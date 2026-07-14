@@ -1,0 +1,38 @@
+name: Build Lotus ISO
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: # يتيح لك تشغيل البناء يدوياً في أي وقت
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+      options: --privileged
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Install Build Dependencies
+      run: |
+        pacman -Syu --noconfirm
+        pacman -S --noconfirm archiso git
+
+    - name: Prepare Lotus Profile
+      run: |
+        mkdir -p /tmp/lotus
+        cp -r /usr/share/archiso/configs/releng/* /tmp/lotus/
+        # استبدال قائمة الحزم الافتراضية بقائمتنا المخصصة لـ Lotus
+        cp packages.x86_64 /tmp/lotus/packages.x86_64
+
+    - name: Build ISO
+      run: |
+        cd /tmp/lotus
+        mkarchiso -v -w /tmp/archiso-limit -o /tmp/out .
+
+    - name: Upload Lotus ISO Artifact
+      uses: actions/allowed/upload-artifact@v4
+      with:
+        name: Lotus-ISO
+        path: /tmp/out/*.iso
