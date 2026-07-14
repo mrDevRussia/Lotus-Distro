@@ -1,15 +1,21 @@
-
+# Bootloaders
 grub
+syslinux
 efibootmgr
+
+# Core system packages
+base
+linux
+linux-firmware
 networkmanager
 git
 
-
+# Video drivers
 xf86-video-intel
 xf86-video-amdgpu
 mesa
 
-
+# Desktop environment
 hyprland
 kitty
 waybar
