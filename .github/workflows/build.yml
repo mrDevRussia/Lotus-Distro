@@ -17,7 +17,7 @@ jobs:
     - name: Install Build Dependencies
       run: |
         pacman -Syu --noconfirm
-        pacman -S --noconfirm archiso git
+        pacman -S --noconfirm archiso git curl
 
     - name: Prepare Lotus Profile
       run: |
@@ -31,8 +31,14 @@ jobs:
         cd /tmp/lotus
         mkarchiso -v -w /tmp/archiso-limit -o /tmp/out .
 
-    - name: Upload Lotus ISO Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: Lotus-ISO
-        path: /tmp/out/*.iso
+    - name: Upload to Transfer.sh (Get Direct Link)
+      run: |
+        ISO_PATH=$(ls /tmp/out/*.iso)
+        echo "Uploading $ISO_PATH to transfer.sh..."
+        curl --upload-file "$ISO_PATH" https://transfer.sh/lotus.iso > download_link.txt
+        echo ""
+        echo "=================================================="
+        echo "YOUR DIRECT DOWNLOAD LINK IS:"
+        cat download_link.txt
+        echo ""
+        echo "=================================================="
