@@ -2,7 +2,11 @@ name: Build Lotus ISO
 on:
   push:
     branches: [ main ]
-  workflow_dispatch: # يتيح لك تشغيل البناء يدوياً في أي وقت
+  workflow_dispatch:
+
+# إعطاء الصلاحية لإنشاء إصدارات (Releases)
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -17,13 +21,13 @@ jobs:
     - name: Install Build Dependencies
       run: |
         pacman -Syu --noconfirm
-        pacman -S --noconfirm archiso git curl
+        pacman -S --noconfirm archiso git
 
     - name: Prepare Lotus Profile
       run: |
         mkdir -p /tmp/lotus
         cp -r /usr/share/archiso/configs/releng/* /tmp/lotus/
-        # استبدال قائمة الحزم الافتراضية بقائمتنا المخصصة لـ Lotus
+        # استبدال قائمة الحزم
         cp packages.x86_64 /tmp/lotus/packages.x86_64
 
     - name: Build ISO
@@ -31,14 +35,12 @@ jobs:
         cd /tmp/lotus
         mkarchiso -v -w /tmp/archiso-limit -o /tmp/out .
 
-    - name: Upload to Transfer.sh (Get Direct Link)
-      run: |
-        ISO_PATH=$(ls /tmp/out/*.iso)
-        echo "Uploading $ISO_PATH to transfer.sh..."
-        curl --upload-file "$ISO_PATH" https://transfer.sh/lotus.iso > download_link.txt
-        echo ""
-        echo "=================================================="
-        echo "YOUR DIRECT DOWNLOAD LINK IS:"
-        cat download_link.txt
-        echo ""
-        echo "=================================================="
+    - name: Upload ISO to GitHub Releases
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: Lotus-Nightly-${{ github.run_number }}
+        name: Lotus OS - Nightly Build #${{ github.run_number }}
+        files: /tmp/out/*.iso
+        body: "النسخة الخام والتجريبية الأولى من نظام Lotus 🚀"
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
