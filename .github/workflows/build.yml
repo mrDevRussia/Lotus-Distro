@@ -32,7 +32,7 @@ jobs:
         mkarchiso -v -w /tmp/archiso-limit -o /tmp/out .
 
     - name: Upload Lotus ISO Artifact
-      uses: actions/allowed/upload-artifact@v4
+      uses: actions/upload-artifact@v4
       with:
         name: Lotus-ISO
         path: /tmp/out/*.iso
